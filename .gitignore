@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.mypy_cache/
+.pytype/
+.pyre/
+
+# Python envs
+.venv/
+venv/
+env/
+ENV/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.parcel-cache/
+.next/
+.nuxt/
+
+# Build outputs
+dist/
+build/
+.out/
+.temp/
+
+# Vite/cache
+.vite/
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# Env and secrets
+.env
+.env.*
+*.env.local
+*.secret
+secrets.*
+
+# IDE/editor
+.vscode/
+.idea/
+*.iml
+
+# OS-specific
+.DS_Store
+Thumbs.db
