@@ -1,0 +1,12 @@
+{
+  "title": "Find Your Best-Fit Internships",
+  "education": "Education (degree / major)",
+  "skills": "Skills (comma separated)",
+  "sector": "Sector Interests",
+  "location": "Preferred Location",
+  "language": "Language",
+  "get_reco": "Get Recommendations",
+  "top_matches": "Top Matches for You",
+  "apply_now": "Apply Now",
+  "no_results": "No results yet. Fill the form and tap Get Recommendations."
+}

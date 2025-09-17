@@ -1,0 +1,17 @@
+{
+  "id": "USER-001",
+  "name": "Ananya Sharma",
+  "education": "B.Sc in Computer Science",
+  "skills": ["Content Creation", "Google Analytics", "Social Media"],
+  "sector_interests": ["Marketing", "AI Research"],
+  "location": "Chennai, Tamil Nadu",
+  "experience": "Completed multiple college projects in AI and healthcare analytics. Interned at a hospital IT department.",
+  "preferences": {
+    "remote": true,
+    "salary_expectation": "₹5,000-15,000",
+    "duration_weeks": 8,
+    "company_size_preference": "50-200"
+  },
+  "career_goals": "Aspiring to work on cutting-edge AI solutions in the finance sector, focusing on risk prediction, fraud detection, and data-driven decision making. Not seeking roles related to DevOps."
+
+}

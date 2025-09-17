@@ -1,0 +1,402 @@
+@import "tw-animate-css";
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Tailwind base layers */
+@import "tailwindcss/preflight";
+@import "tailwindcss/utilities";
+
+/* Glassmorphism color tokens */
+:root {
+  --font-merriweather: "Merriweather", serif;
+  --font-roboto: "Roboto", sans-serif;
+
+  /* Background / Foreground */
+  --background: rgba(255, 255, 255, 0.8);
+  --foreground: #0a2342; /* Deep Navy */
+
+  /* Cards / Popovers */
+  --card: rgba(255, 255, 255, 0.6);
+  --card-foreground: #0a2342;
+  --popover: rgba(255, 255, 255, 0.9);
+  --popover-foreground: #0a2342;
+
+  /* Primary (Saffron) */
+  --primary: #ff9933;
+  --primary-foreground: #ffffff;
+
+  /* Secondary (Emerald Green) */
+  --secondary: #138808;
+  --secondary-foreground: #ffffff;
+
+  /* Muted (Powder Blue) */
+  --muted: rgba(176, 216, 245, 0.3);
+  --muted-foreground: #0a2342;
+
+  /* Accent (Navy) */
+  --accent: #0a2342;
+  --accent-foreground: #ffffff;
+
+  /* Destructive */
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+
+  /* Borders / Inputs / Ring */
+  --border: rgba(255, 255, 255, 0.2);
+  --input: rgba(255, 255, 255, 0.8);
+  --ring: rgba(255, 153, 51, 0.5);
+
+  --radius: 0.75rem;
+
+  /* Charts */
+  --chart-1: #ff9933; /* Saffron */
+  --chart-2: #138808; /* Emerald Green */
+  --chart-3: #b0d8f5; /* Powder Blue */
+  --chart-4: #0a2342; /* Navy */
+  --chart-5: #dc2626; /* Red */
+
+  /* Sidebar */
+  --sidebar: rgba(255, 255, 255, 0.7);
+  --sidebar-foreground: #0a2342;
+  --sidebar-primary: #ff9933;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #138808;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.3);
+  --sidebar-ring: rgba(255, 153, 51, 0.5);
+}
+
+/* Body background */
+
+body {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.85) 0%,     /* softer white */
+    rgba(176, 216, 245, 0.4) 25%,     /* light blue, more visible */
+    rgba(255, 153, 51, 0.25) 50%,     /* orange accent, moderate */
+    rgba(19, 136, 8, 0.25) 75%,       /* green accent, moderate */
+    rgba(255, 255, 255, 0.85) 100%    /* soft white end */
+  );
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/*
+light bg
+body {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(176, 216, 245, 0.3) 25%,
+    rgba(255, 153, 51, 0.1) 50%,
+    rgba(19, 136, 8, 0.1) 75%,
+    rgba(255, 255, 255, 0.8) 100%
+  );
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+*/
+
+/*
+
+dark shade bg 
+body {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 140, 239, 0.8) 0%,      
+    rgba(176, 216, 245, 0.5) 25%,  
+    rgba(255, 153, 51, 0.4) 50%,   
+    rgba(19, 136, 8, 0.4) 75%,     
+    rgba(255, 255, 255, 0.9) 100%  
+  );
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+*/
+
+/* Custom glassmorphism utilities */
+@layer utilities {
+
+  .glass {
+    background-color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+  }
+  .glass-strong {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(12px);
+  }
+  .glass-subtle {
+    background-color: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(4px);
+  }
+  .glass-card {
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(10px);
+  }
+  .glass-input {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  .glass-input:focus {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-color: rgba(255, 153, 51, 0.5);
+  }
+}
+
+/* Tailwind tokens mapping */
+@theme inline {
+  --spacing: 0.25rem;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* Dark mode overrides */
+.dark {
+  --background: rgba(10, 35, 66, 0.9);
+  --foreground: #ffffff;
+
+  --card: rgba(10, 35, 66, 0.8);
+  --card-foreground: #ffffff;
+
+  --popover: rgba(10, 35, 66, 0.95);
+  --popover-foreground: #ffffff;
+
+  --primary: #ff9933;
+  --primary-foreground: #0a2342;
+
+  --secondary: #138808;
+  --secondary-foreground: #ffffff;
+
+  --muted: rgba(176, 216, 245, 0.1);
+  --muted-foreground: rgba(255, 255, 255, 0.7);
+
+  --accent: #b0d8f5;
+  --accent-foreground: #0a2342;
+
+  --destructive: #dc2626;
+
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.1);
+  --ring: rgba(255, 153, 51, 0.5);
+
+  --chart-1: #ff9933;
+  --chart-2: #138808;
+  --chart-3: #b0d8f5;
+  --chart-4: #ffffff;
+  --chart-5: #dc2626;
+
+  --sidebar: rgba(10, 35, 66, 0.8);
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #ff9933;
+  --sidebar-primary-foreground: #0a2342;
+  --sidebar-accent: #138808;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: rgba(255, 153, 51, 0.5);
+}
+
+/* Base styles */
+@layer base {
+  * {
+    border-color: var(--color-border);
+    outline-color: color-mix(in oklab, var(--color-ring) 50%, transparent);
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  /* Typography scale */
+  h1, .page-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-weight-bold);
+  }
+  h2, .section-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-weight-semibold);
+  }
+  h3, .subsection-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-weight-semibold);
+  }
+  h4 {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+  }
+
+  /* Responsive typography */
+  @media (min-width: 768px) {
+    h1, .page-title { font-size: var(--text-5xl); }
+    h2, .section-title { font-size: var(--text-3xl); }
+    h3, .subsection-title { font-size: var(--text-xl); }
+    h4 { font-size: var(--text-lg); }
+  }
+}
+
+/* Card & form utilities */
+@layer utilities {
+
+    .form-card {
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 1.5rem;   /* ~24px spacing above */
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.08); /* subtle neutral border */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border-radius: var(--radius-lg);
+    background-color: var(--card); /* keeps glass look */
+  }
+
+  /* 2. Dynamic entry boxes (education, projects, etc.) */
+  .dynamic-entry {
+    background-color: rgba(240, 248, 255, 0.5); /* very light blue-tinted glass */
+    border: 1px solid rgba(0, 0, 0, 0.08);      /* soft gray border */
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  }
+
+  /* 3. Form fields inside dynamic entries */
+  .dynamic-entry input,
+  .dynamic-entry textarea {
+    border: 1px solid rgba(0, 0, 0, 0.15); /* subtle gray */
+    border-radius: var(--radius-sm);
+    padding: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.85);
+  }
+  .dynamic-entry input:focus,
+  .dynamic-entry textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--ring);
+    outline: none;
+  }
+
+  /* 4. All input fields should have borders */
+  input, textarea, select {
+    border: 1px solid rgba(0, 0, 0, 0.2) !important;
+    border-radius: var(--radius-sm);
+    background-color: rgba(255, 255, 255, 0.9);
+  }
+  
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 2px var(--ring);
+    outline: none;
+  }
+  
+  input[readonly] {
+    background-color: rgba(240, 240, 240, 0.8) !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .card-root {
+    margin-left: var(--spacing-4);
+    margin-right: var(--spacing-4);
+  }
+  @media (min-width: 640px) {
+    .card-root {
+      margin-left: var(--spacing-6);
+      margin-right: var(--spacing-6);
+    }
+  }
+  @media (min-width: 1024px) {
+    .card-root {
+      margin-left: auto;
+      margin-right: auto;
+      max-width: var(--container-4xl);
+    }
+  }
+  @media (min-width: 1280px) {
+    .card-root {
+      max-width: var(--container-5xl);
+    }
+  }
+
+  .card-container {
+    width: 70%;
+    max-width: var(--container-4xl);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--spacing-4);
+    padding-right: var(--spacing-4);
+    padding-top: var(--spacing-8);
+    padding-bottom: var(--spacing-8);
+  }
+
+  .form-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6);
+  }
+  @media (min-width: 640px) {
+    .form-container {
+      gap: var(--spacing-8);
+    }
+  }
+
+  .form-section {
+    padding: var(--spacing-4);
+  }
+  @media (min-width: 640px) {
+    .form-section {
+      padding: var(--spacing-6);
+    }
+  }
+
+  /* Ensure cards don't touch edges */
+  .glass-card {
+    margin-left: var(--spacing-4);
+    margin-right: var(--spacing-4);
+  }
+  @media (min-width: 640px) {
+    .glass-card {
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }
+}
