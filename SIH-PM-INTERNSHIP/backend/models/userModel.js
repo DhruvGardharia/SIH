@@ -50,7 +50,7 @@ const userSchema = new mongoose.Schema({
   education: {
     type: [educationSchema],
     default: [],
-    validate: [arr => arr.length <= 5, "Too many education entries"] // sanity check
+    // validate: [arr => arr.length <= 5, "Too many education entries"] // sanity check
   },
 
   // Skills & Resume

@@ -99,24 +99,24 @@ const Reset = () => {
   };
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-gradient-to-b from-black to-gray-900'>
+    <div className='min-h-screen flex items-center justify-center'>
       <motion.div 
-        className='p-8 rounded-lg shadow-lg w-full max-w-md backdrop-blur-sm bg-opacity-80 bg-[#1A1A1D] border border-gray-800'
+        className='p-8 rounded-lg shadow-lg w-full max-w-md glass-card border border-border'
         initial="hidden"
         animate="visible"
         variants={containerVariants}
       >
-        <motion.h2 className='text-xl font-semibold text-center mb-2 text-[#50c878]' variants={itemVariants}>
+        <motion.h2 className='text-xl font-semibold text-center mb-2 text-primary' variants={itemVariants}>
           PROIMG
         </motion.h2>
         
-        <motion.h2 className='text-2xl font-bold text-white text-center mb-6' variants={itemVariants}>
+        <motion.h2 className='text-2xl font-bold text-foreground text-center mb-6' variants={itemVariants}>
           Reset Password
         </motion.h2>
         
         {formError && (
           <motion.div 
-            className='mb-4 p-3 bg-red-500 bg-opacity-20 border border-red-500 rounded text-red-300 text-sm'
+            className='mb-4 p-3 bg-destructive/15 border border-destructive rounded text-destructive-foreground text-sm'
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             transition={{ duration: 0.3 }}
@@ -127,12 +127,12 @@ const Reset = () => {
         
         <form onSubmit={submitHandler}>
           <motion.div className='mb-4' variants={itemVariants}>
-            <label htmlFor="otp" className='block text-sm font-medium text-gray-300 mb-1'>
+            <label htmlFor="otp" className='block text-sm font-medium text-foreground mb-1'>
               VERIFICATION CODE
             </label>
             <div className='relative'>
               <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                <FaKey className='text-gray-500' />
+                <FaKey className='text-muted-foreground' />
               </div>
               <input 
                 value={otp} 
@@ -146,7 +146,7 @@ const Reset = () => {
                 required 
                 type="text" 
                 id='otp' 
-                className='w-full py-2 pl-10 pr-3 border border-gray-700 bg-gray-900 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-[#50c878] focus:border-transparent tracking-widest text-center font-mono' 
+                className='w-full py-2 pl-10 pr-3 border border-input bg-background/80 rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent tracking-widest text-center font-mono' 
                 placeholder='Enter 6-digit code'
                 maxLength={6}
               />
@@ -154,12 +154,12 @@ const Reset = () => {
           </motion.div>
           
           <motion.div className='mb-4' variants={itemVariants}>
-            <label htmlFor="password" className='block text-sm font-medium text-gray-300 mb-1'>
+            <label htmlFor="password" className='block text-sm font-medium text-foreground mb-1'>
               NEW PASSWORD
             </label>
             <div className='relative'>
               <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                <FaLock className='text-gray-500' />
+                <FaLock className='text-muted-foreground' />
               </div>
               <input 
                 value={password} 
@@ -167,7 +167,7 @@ const Reset = () => {
                 required 
                 type={showPassword ? "text" : "password"} 
                 id='password' 
-                className='w-full py-2 pl-10 pr-10 border border-gray-700 bg-gray-900 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-[#50c878] focus:border-transparent' 
+                className='w-full py-2 pl-10 pr-10 border border-input bg-background/80 rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent' 
                 placeholder='Create new password'
                 minLength={8}
               />
@@ -176,8 +176,8 @@ const Reset = () => {
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? 
-                  <FaEyeSlash className='text-gray-500 hover:text-gray-300' /> : 
-                  <FaEye className='text-gray-500 hover:text-gray-300' />
+                  <FaEyeSlash className='text-muted-foreground hover:text-foreground' /> : 
+                  <FaEye className='text-muted-foreground hover:text-foreground' />
                 }
               </div>
             </div>
@@ -185,12 +185,12 @@ const Reset = () => {
             {password && (
               <div className='mt-2'>
                 <div className='flex items-center justify-between mb-1'>
-                  <span className='text-xs text-gray-400'>Password strength:</span>
+                  <span className='text-xs text-muted-foreground'>Password strength:</span>
                   <span className='text-xs font-medium' style={{ color: getPasswordStrengthColor(password).replace('bg-', 'text-') }}>
                     {getPasswordStrengthText(password)}
                   </span>
                 </div>
-                <div className='w-full h-1 bg-gray-700 rounded-full overflow-hidden'>
+                <div className='w-full h-1 bg-muted rounded-full overflow-hidden'>
                   <motion.div 
                     className={`h-full ${getPasswordStrengthColor(password)}`}
                     initial={{ width: 0 }}
@@ -203,7 +203,7 @@ const Reset = () => {
                     transition={{ duration: 0.3 }}
                   />
                 </div>
-                <div className='mt-1 text-xs text-gray-400'>
+                <div className='mt-1 text-xs text-muted-foreground'>
                   Use at least 8 characters with uppercase, lowercase, numbers, and special characters.
                 </div>
               </div>
@@ -211,12 +211,12 @@ const Reset = () => {
           </motion.div>
           
           <motion.div className='mb-6' variants={itemVariants}>
-            <label htmlFor="confirmPassword" className='block text-sm font-medium text-gray-300 mb-1'>
+            <label htmlFor="confirmPassword" className='block text-sm font-medium text-foreground mb-1'>
               CONFIRM PASSWORD
             </label>
             <div className='relative'>
               <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                <FaLock className='text-gray-500' />
+                <FaLock className='text-muted-foreground' />
               </div>
               <input 
                 value={confirmPassword} 
@@ -224,7 +224,7 @@ const Reset = () => {
                 required 
                 type={showConfirmPassword ? "text" : "password"} 
                 id='confirmPassword' 
-                className='w-full py-2 pl-10 pr-10 border border-gray-700 bg-gray-900 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-[#50c878] focus:border-transparent' 
+                className='w-full py-2 pl-10 pr-10 border border-input bg-background/80 rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent' 
                 placeholder='Confirm new password'
               />
               <div 
@@ -232,16 +232,16 @@ const Reset = () => {
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
                 {showConfirmPassword ? 
-                  <FaEyeSlash className='text-gray-500 hover:text-gray-300' /> : 
-                  <FaEye className='text-gray-500 hover:text-gray-300' />
+                  <FaEyeSlash className='text-muted-foreground hover:text-foreground' /> : 
+                  <FaEye className='text-muted-foreground hover:text-foreground' />
                 }
               </div>
             </div>
             {password && confirmPassword && (
               <div className='mt-1 text-xs text-right'>
                 {password === confirmPassword ? 
-                  <span className='text-green-400'>Passwords match</span> : 
-                  <span className='text-red-400'>Passwords don't match</span>
+                  <span className='text-green-600'>Passwords match</span> : 
+                  <span className='text-red-600'>Passwords don't match</span>
                 }
               </div>
             )}
@@ -249,7 +249,7 @@ const Reset = () => {
           
           <motion.button 
             type='submit' 
-            className='w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#50c878] hover:bg-[#3daf63] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#50c878] transition-colors duration-200 flex items-center justify-center'
+            className='w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 flex items-center justify-center'
             disabled={btnLoading}
             variants={itemVariants}
             whileHover={{ scale: 1.02 }}
@@ -260,9 +260,9 @@ const Reset = () => {
         </form>
         
         <motion.div className='mt-6 text-center' variants={itemVariants}>
-          <div className='text-gray-300'>
+          <div className='text-muted-foreground'>
             Remember your password?{' '}
-            <Link to="/login" className='font-medium text-[#50c878] hover:underline'>
+            <Link to="/login" className='font-medium text-primary hover:underline'>
               Sign in
             </Link>
           </div>

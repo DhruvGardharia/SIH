@@ -1,10 +1,174 @@
+# import json
+# import os
+# import re
+# from typing import List, Dict
+# import numpy as np
+# from fastapi import FastAPI
+# from fastapi import Body, UploadFile, File, Form
+# from fastapi.middleware.cors import CORSMiddleware
+# from sklearn.feature_extraction.text import TfidfVectorizer
+# from sklearn.metrics.pairwise import cosine_similarity
+# from openai import OpenAI
+# import requests
+# import hashlib
+# from collections import OrderedDict
+
+# # ------------------------------
+# # Paths & Data Loading
+# # ------------------------------
+# DATA_PATH = os.path.join(os.path.dirname(__file__), "internships.json")
+# USER_PATH = os.path.join(os.path.dirname(__file__), "user.json")
+
+# def load_user() -> Dict:
+#     with open(USER_PATH, "r", encoding="utf-8") as f:
+#         return json.load(f)
+
+# def load_internships() -> List[Dict]:
+#     with open(DATA_PATH, "r", encoding="utf-8") as f:
+#         data = json.load(f)
+#     for it in data:
+#         it["_skills_text"] = " ".join([s.lower() for s in it.get("skills", [])])
+#         it["_sector_lc"] = it.get("sector", "").lower()
+#         it["_location_lc"] = it.get("location", "").lower()
+#         it["_title_lc"] = it.get("title", "").lower()
+#         # Weighted blob to emphasize important fields (title > skills > sector/location)
+#         it["text_blob"] = f"{it['_title_lc']} {it['_skills_text']} {it['_sector_lc']} {it['_location_lc']}"
+#         it["weighted_blob"] = (
+#             (it["_title_lc"] + " ") * 3 +
+#             (it["_skills_text"] + " ") * 2 +
+#             it["_sector_lc"] + " " +
+#             it["_location_lc"]
+#         ).strip()
+#     return data
+
+# # ------------------------------
+# # Helper
+# # ------------------------------
+# def _normalize_tokens(items: List[str]) -> str:
+#     cleaned = []
+#     for x in items:
+#         x = x.strip().lower()
+#         x = re.sub(r"[^a-z0-9+.# ]+", " ", x)
+#         cleaned.append(x)
+#     return " ".join(cleaned)
+
+# def _expand_skill_terms(skills: List[str]) -> List[str]:
+#     # Minimal synonym expansion to improve recall without extra deps
+#     synonym_map = {
+#         "react": ["react", "reactjs", "react.js", "frontend"],
+#         "html": ["html", "html5", "frontend"],
+#         "css": ["css", "css3", "frontend"],
+#         "express": ["express", "expressjs", "express.js", "node", "node.js"],
+#         "javascript": ["javascript", "js"],
+#         "python": ["python", "py"],
+#         "machine learning": ["machine learning", "ml", "ai"],
+#         "data analysis": ["data analysis", "analytics"],
+#         "sql": ["sql", "postgres", "mysql"],
+#         "cloud": ["cloud", "aws", "gcp", "azure"],
+#         "kubernetes": ["kubernetes", "k8s"],
+#     }
+#     expanded: List[str] = []
+#     for s in skills:
+#         key = s.lower().strip()
+#         expanded.extend(synonym_map.get(key, [key]))
+#     return list(dict.fromkeys(expanded))  # de-duplicate preserving order
+
+# def _count_skill_hits(user_skills: List[str], it: Dict) -> int:
+#     haystack = (it.get("_skills_text", "") + " " + it.get("_title_lc", "")).lower()
+#     return sum(1 for s in user_skills if s.lower() in haystack)
+
+# def _is_remote_location(loc_lc: str) -> bool:
+#     return (
+#         ("remote" in loc_lc)
+#         or ("work from home" in loc_lc)
+#         or ("wfh" in loc_lc)
+#         or ("hybrid" in loc_lc)
+#     )
+
+# # ------------------------------
+# # TF-IDF Recommender
+# # ------------------------------
+# class Recommender:
+#     def __init__(self, internships: List[Dict]):
+#         self.internships = internships
+#         self.corpus = [it.get("weighted_blob") or it["text_blob"] for it in internships]
+#         self.vectorizer = TfidfVectorizer(
+#             ngram_range=(1,3),
+#             min_df=1,
+#             max_df=0.9,
+#             stop_words="english",
+#             sublinear_tf=True,
+#         )
+#         self.matrix = self.vectorizer.fit_transform(self.corpus)
+
+#     def recommend(self, education: str, skills: List[str], sector_interests: List[str], location: str, top_n: int = 10, preferences: Dict = None, career_goals: str = ""):
+#         # Expand skills/sectors and include preference/career tokens in the query text
+#         expanded_skills = _expand_skill_terms(skills)
+#         prefers_remote = bool((preferences or {}).get("remote", False))
+#         remote_tokens = ["remote", "work from home", "wfh", "hybrid"] if prefers_remote else []
+#         career_tokens = []
+#         if career_goals:
+#             cg = career_goals.lower()
+#             if any(k in cg for k in ["health", "healthcare", "biotech", "medical", "medtech"]):
+#                 career_tokens.extend(["health", "healthcare", "biotech", "medical", "medtech"])
+#         user_text = " ".join([
+#             education.lower(),
+#             _normalize_tokens(expanded_skills),
+#             _normalize_tokens(sector_interests),
+#             _normalize_tokens(remote_tokens + career_tokens)
+#         ]).strip()
+#         if not user_text:
+#             user_text = "internship general"
+#         user_vec = self.vectorizer.transform([user_text])
+#         sim = cosine_similarity(user_vec, self.matrix).flatten()
+
+#         loc = (location or "").lower().strip()
+#         sectors = [s.lower().strip() for s in sector_interests]
+#         prefers_remote = bool((preferences or {}).get("remote", False))
+#         career_goals_lc = (career_goals or "").lower()
+#         cares_health = any(k in career_goals_lc for k in ["health", "healthcare", "biotech", "medical", "medtech"]) if career_goals_lc else False
+
+#         scores = []
+#         for idx, it in enumerate(self.internships):
+#             score = float(sim[idx])
+#             if sectors:
+#                 if it["_sector_lc"] in sectors:
+#                     score += 0.20  # prioritize sector exact match
+#                 elif any(s in it["_sector_lc"] for s in sectors):
+#                     score += 0.10  # higher weight for partial sector overlap
+#             if loc:
+#                 if loc == it["_location_lc"]:
+#                     score += 0.10
+#                 elif loc in it["_location_lc"] or it["_location_lc"] in loc:
+#                     score += 0.05
+#             # Stronger emphasis on direct skill overlap
+#             skill_hits = sum(1 for s in skills if s.lower() in (it["_skills_text"] + " " + it["_title_lc"]))
+#             score += min(0.12 * skill_hits, 0.48)
+#             # Remote preference bonus/penalty
+#             if prefers_remote:
+#                 is_remote = ("remote" in it["_location_lc"]) or ("work from home" in it["_location_lc"]) or ("wfh" in it["_location_lc"]) or ("hybrid" in it["_location_lc"])  # lenient
+#                 if is_remote:
+#                     score += 0.12
+#                 else:
+#                     score -= 0.08
+#             # Healthcare/biotech keyword bonus when goals mention healthcare
+#             if cares_health:
+#                 text = it["_title_lc"] + " " + it["_sector_lc"]
+#                 if any(k in text for k in ["health", "healthcare", "bio", "biotech", "medical", "medtech", "clinic", "hospital"]):
+#                     score += 0.08
+#             scores.append((idx, score))
+
+#         scores.sort(key=lambda x: x[1], reverse=True)
+#         top = scores[:top_n]
+#         return [self.internships[idx] for idx, _ in top]
+
 import json
 import os
 import re
 from typing import List, Dict
 import numpy as np
 from fastapi import FastAPI
-from fastapi import Body, UploadFile, File, Form
+from fastapi import Body
 from fastapi.middleware.cors import CORSMiddleware
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -12,6 +176,8 @@ from openai import OpenAI
 import requests
 import hashlib
 from collections import OrderedDict
+from sklearn.metrics import jaccard_score
+from scipy.spatial.distance import euclidean, cityblock
 
 # ------------------------------
 # Paths & Data Loading
@@ -31,7 +197,7 @@ def load_internships() -> List[Dict]:
         it["_sector_lc"] = it.get("sector", "").lower()
         it["_location_lc"] = it.get("location", "").lower()
         it["_title_lc"] = it.get("title", "").lower()
-        # Weighted blob to emphasize important fields (title > skills > sector/location)
+        # Weighted blob to emphasize important fields
         it["text_blob"] = f"{it['_title_lc']} {it['_skills_text']} {it['_sector_lc']} {it['_location_lc']}"
         it["weighted_blob"] = (
             (it["_title_lc"] + " ") * 3 +
@@ -42,7 +208,7 @@ def load_internships() -> List[Dict]:
     return data
 
 # ------------------------------
-# Helper
+# Helper Similarity Functions
 # ------------------------------
 def _normalize_tokens(items: List[str]) -> str:
     cleaned = []
@@ -53,7 +219,6 @@ def _normalize_tokens(items: List[str]) -> str:
     return " ".join(cleaned)
 
 def _expand_skill_terms(skills: List[str]) -> List[str]:
-    # Minimal synonym expansion to improve recall without extra deps
     synonym_map = {
         "react": ["react", "reactjs", "react.js", "frontend"],
         "html": ["html", "html5", "frontend"],
@@ -71,22 +236,41 @@ def _expand_skill_terms(skills: List[str]) -> List[str]:
     for s in skills:
         key = s.lower().strip()
         expanded.extend(synonym_map.get(key, [key]))
-    return list(dict.fromkeys(expanded))  # de-duplicate preserving order
+    return list(dict.fromkeys(expanded))
 
 def _count_skill_hits(user_skills: List[str], it: Dict) -> int:
     haystack = (it.get("_skills_text", "") + " " + it.get("_title_lc", "")).lower()
     return sum(1 for s in user_skills if s.lower() in haystack)
 
 def _is_remote_location(loc_lc: str) -> bool:
-    return (
-        ("remote" in loc_lc)
-        or ("work from home" in loc_lc)
-        or ("wfh" in loc_lc)
-        or ("hybrid" in loc_lc)
-    )
+    return ("remote" in loc_lc) or ("work from home" in loc_lc) or ("wfh" in loc_lc) or ("hybrid" in loc_lc)
+
+# Extra similarity models
+def _dot_product(user_vec, job_vec):
+    result = user_vec @ job_vec.T
+    # Handle sparse matrix result
+    if hasattr(result, 'toarray'):
+        return float(result.toarray()[0, 0])
+    return float(result)
+
+def _jaccard_similarity(user_vec, job_vec):
+    u = (user_vec.toarray() > 0).astype(int).flatten()
+    v = (job_vec.toarray() > 0).astype(int).flatten()
+    # Handle case where both vectors are all zeros
+    if u.sum() == 0 and v.sum() == 0:
+        return 1.0
+    return float(jaccard_score(u, v))
+
+def _euclidean_similarity(user_vec, job_vec):
+    dist = euclidean(user_vec.toarray().flatten(), job_vec.toarray().flatten())
+    return 1 / (1 + dist)
+
+def _manhattan_similarity(user_vec, job_vec):
+    dist = cityblock(user_vec.toarray().flatten(), job_vec.toarray().flatten())
+    return 1 / (1 + dist)
 
 # ------------------------------
-# TF-IDF Recommender
+# TF-IDF Recommender with Hybrid Scoring
 # ------------------------------
 class Recommender:
     def __init__(self, internships: List[Dict]):
@@ -101,8 +285,7 @@ class Recommender:
         )
         self.matrix = self.vectorizer.fit_transform(self.corpus)
 
-    def recommend(self, education: str, skills: List[str], sector_interests: List[str], location: str, top_n: int = 10, preferences: Dict = None, career_goals: str = ""):
-        # Expand skills/sectors and include preference/career tokens in the query text
+    def recommend(self, education: str, skills: List[str], sector_interests: List[str], location: str, top_n: int = 10, preferences: Dict = None, career_goals: str = "", use_hybrid: bool = True):
         expanded_skills = _expand_skill_terms(skills)
         prefers_remote = bool((preferences or {}).get("remote", False))
         remote_tokens = ["remote", "work from home", "wfh", "hybrid"] if prefers_remote else []
@@ -120,47 +303,75 @@ class Recommender:
         if not user_text:
             user_text = "internship general"
         user_vec = self.vectorizer.transform([user_text])
-        sim = cosine_similarity(user_vec, self.matrix).flatten()
 
-        loc = (location or "").lower().strip()
-        sectors = [s.lower().strip() for s in sector_interests]
-        prefers_remote = bool((preferences or {}).get("remote", False))
-        career_goals_lc = (career_goals or "").lower()
-        cares_health = any(k in career_goals_lc for k in ["health", "healthcare", "biotech", "medical", "medtech"]) if career_goals_lc else False
+        print("User Query Text:", user_text)
+        print("Expanded Skills:", expanded_skills)
+        print("Preferences:", preferences)
+        print("Career Goals:", career_goals)
+
+        # Base cosine similarity
+        sim_cos = cosine_similarity(user_vec, self.matrix).flatten()
+        print("Cosine similarities computed.")
 
         scores = []
         for idx, it in enumerate(self.internships):
-            score = float(sim[idx])
-            if sectors:
-                if it["_sector_lc"] in sectors:
-                    score += 0.20  # prioritize sector exact match
-                elif any(s in it["_sector_lc"] for s in sectors):
-                    score += 0.10  # higher weight for partial sector overlap
-            if loc:
+            score = float(sim_cos[idx])
+
+            if use_hybrid:
+                job_vec = self.matrix[idx]
+                sim_dot = _dot_product(user_vec, job_vec)
+                sim_jaccard = _jaccard_similarity(user_vec, job_vec)
+                sim_euclid = _euclidean_similarity(user_vec, job_vec)
+                sim_manhattan = _manhattan_similarity(user_vec, job_vec)
+
+                print(f"Job {idx} -> Cosine: {score:.4f}, Dot: {sim_dot:.4f}, Jaccard: {sim_jaccard:.4f}, Euclidean: {sim_euclid:.4f}, Manhattan: {sim_manhattan:.4f}")
+
+                # Weighted hybrid score
+                score = (
+                    0.5 * score +
+                    0.2 * sim_dot +
+                    0.15 * sim_jaccard +
+                    0.1 * sim_euclid +
+                    0.05 * sim_manhattan
+                )
+
+            # Sector/location/skill/remote/goal adjustments (kept from your code)
+            if sector_interests:
+                if it["_sector_lc"] in [s.lower() for s in sector_interests]:
+                    score += 0.20
+                elif any(s in it["_sector_lc"] for s in sector_interests):
+                    score += 0.10
+            if location:
+                loc = location.lower().strip()
                 if loc == it["_location_lc"]:
                     score += 0.10
                 elif loc in it["_location_lc"] or it["_location_lc"] in loc:
                     score += 0.05
-            # Stronger emphasis on direct skill overlap
             skill_hits = sum(1 for s in skills if s.lower() in (it["_skills_text"] + " " + it["_title_lc"]))
             score += min(0.12 * skill_hits, 0.48)
-            # Remote preference bonus/penalty
             if prefers_remote:
-                is_remote = ("remote" in it["_location_lc"]) or ("work from home" in it["_location_lc"]) or ("wfh" in it["_location_lc"]) or ("hybrid" in it["_location_lc"])  # lenient
-                if is_remote:
+                if _is_remote_location(it["_location_lc"]):
                     score += 0.12
                 else:
                     score -= 0.08
-            # Healthcare/biotech keyword bonus when goals mention healthcare
-            if cares_health:
+            if "health" in career_goals.lower():
                 text = it["_title_lc"] + " " + it["_sector_lc"]
                 if any(k in text for k in ["health", "healthcare", "bio", "biotech", "medical", "medtech", "clinic", "hospital"]):
                     score += 0.08
+
+            print(f"Final Score for Job {idx} ({it['title']}): {score:.4f}")
+
             scores.append((idx, score))
 
         scores.sort(key=lambda x: x[1], reverse=True)
         top = scores[:top_n]
+        print("Top Jobs Selected:", [self.internships[idx]["title"] for idx, _ in top])
         return [self.internships[idx] for idx, _ in top]
+
+# ------------------------------
+# (Rest of your original code remains unchanged...)
+# ------------------------------
+
 
 # ------------------------------
 # Embeddings & Similarity

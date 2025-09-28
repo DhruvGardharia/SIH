@@ -503,74 +503,6 @@ export const applyOcrDraft = TryCatch(async (req, res) => {
 // controllers/ocrController.js
 import FormData from "form-data";
 
-function transformProjects(projectsArr = []) {
-  return projectsArr.map((projStr) => {
-    // Split on the first "—" (em-dash) to separate title and description
-    const [titlePart, ...rest] = projStr.split("—");
-    const title = titlePart?.trim() || "Untitled Project";
-    const description = rest.join("—").trim();
-
-    return {
-      title,
-      description,
-      link: "" // OCR won’t give links, so keep empty for now
-    };
-  });
-}
-
-function transformEducation(educationArr = []) {
-  return educationArr.map((eduStr) => {
-    // Enhanced parsing to extract more information from OCR text
-    const text = eduStr.trim();
-    
-    // Try to extract degree information
-    let degreeName = "";
-    let educationLevel = "";
-    
-    // Common degree patterns
-    const degreePatterns = {
-      'B.Tech': { degree: 'B.Tech', level: 'UG' },
-      'B.E.': { degree: 'B.E.', level: 'UG' },
-      'B.E': { degree: 'B.E.', level: 'UG' },
-      'B.Sc': { degree: 'B.Sc', level: 'UG' },
-      'B.Sc.': { degree: 'B.Sc.', level: 'UG' },
-      'B.Com': { degree: 'B.Com', level: 'UG' },
-      'B.Com.': { degree: 'B.Com.', level: 'UG' },
-      'B.A': { degree: 'B.A', level: 'UG' },
-      'B.A.': { degree: 'B.A.', level: 'UG' },
-      'M.Tech': { degree: 'M.Tech', level: 'PG' },
-      'M.E.': { degree: 'M.E.', level: 'PG' },
-      'M.E': { degree: 'M.E.', level: 'PG' },
-      'M.Sc': { degree: 'M.Sc', level: 'PG' },
-      'M.Sc.': { degree: 'M.Sc.', level: 'PG' },
-      'M.Com': { degree: 'M.Com', level: 'PG' },
-      'M.Com.': { degree: 'M.Com.', level: 'PG' },
-      'M.A': { degree: 'M.A', level: 'PG' },
-      'M.A.': { degree: 'M.A.', level: 'PG' },
-      'MBA': { degree: 'MBA', level: 'PG' },
-      'MCA': { degree: 'MCA', level: 'PG' },
-      'Diploma': { degree: 'Diploma', level: 'Diploma' }
-    };
-    
-    // Check for degree patterns
-    for (const [pattern, info] of Object.entries(degreePatterns)) {
-      if (text.toLowerCase().includes(pattern.toLowerCase())) {
-        degreeName = info.degree;
-        educationLevel = info.level;
-        break;
-      }
-    }
-    
-    return {
-      educationLevel: educationLevel,
-      degreeName: degreeName,
-      collegeName: text, // store raw string as collegeName
-      yearOfStudy: "",   // leave empty for now
-      cgpa: null         // default null
-    };
-  });
-}
-
 
 export const uploadResumeAndExtract = TryCatch(async (req, res) => {
   let resumeUrl = req.body?.resumeUrl;
@@ -597,7 +529,7 @@ export const uploadResumeAndExtract = TryCatch(async (req, res) => {
     sendBuffer = req.file.buffer;
   }
 
-  if (!resumeUrl) {
+  if (!resumeUrl && !sendBuffer) {
     return res
       .status(400)
       .json({ message: 'Provide resumeUrl or upload a file as "file"' });
@@ -618,17 +550,27 @@ export const uploadResumeAndExtract = TryCatch(async (req, res) => {
     form.append("resume_url", resumeUrl);
   }
 
-  let data = { skills: [], certifications: [], projects: [], education: [] };
+  let simpleData = { skills: [], certifications: [], projects: [], education: [] };
   try {
-    const resp = await axios.post(`${ocrBase}/extract`, form, {
+    const resp = await axios.post(`${ocrBase}/extract/`, form, {
       headers: form.getHeaders(),
-      timeout: 20000,
+      timeout: 1200000,
     });
-    console.log("response from OCR service:", resp.data);
-    data = resp.data || data;
+    console.log("response from Python OCR service:", resp.data);
+    
+    // Extract ocrDraft from SimpleResumeResponse
+    if (resp.data && resp.data.ocrDraft) {
+      simpleData = resp.data.ocrDraft;
+    }
   } catch (e) {
-    console.error("OCR service error:", e?.message || e);
+    console.error("Python OCR service error:", e?.message || e);
+    return res.status(500).json({ 
+      message: "Failed to process resume", 
+      error: e?.message || "OCR service unavailable" 
+    });
   }
+
+  console.log("simpleData", simpleData.education[0]);
 
   // ✅ Save draft in user
   const user = await User.findByIdAndUpdate(
@@ -637,10 +579,10 @@ export const uploadResumeAndExtract = TryCatch(async (req, res) => {
       $set: {
         resumeFile: resumeUrl,
         ocrDraft: {
-          skills: Array.isArray(data.skills) ? data.skills : [],
-          certifications: Array.isArray(data.certifications) ? data.certifications : [],
-          projects: transformProjects(data.projects || []),
-          education: transformEducation(data.education || []),
+          skills: Array.isArray(simpleData.skills) ? simpleData.skills : [],
+          certifications: Array.isArray(simpleData.certifications) ? simpleData.certifications : [],
+          projects: Array.isArray(simpleData.projects) ? simpleData.projects : [],
+          education: Array.isArray(simpleData.education) ? simpleData.education : [],
           extractedAt: new Date(),
           source: "resume",
         },
@@ -649,7 +591,64 @@ export const uploadResumeAndExtract = TryCatch(async (req, res) => {
     { new: true }
   );
 
-  res.json({ success: true, ...user.ocrDraft });
+  // ✅ Apply OCR draft to user profile (merge extracted data)
+  const draft = user.ocrDraft || {};
+
+  // merge skills
+  if (Array.isArray(draft.skills) && draft.skills.length) {
+    const existing = new Set((user.skills || []).map(canonicalize).filter(Boolean));
+    for (const sk of draft.skills) {
+      const can = canonicalize(sk);
+      if (can && !existing.has(can)) {
+        user.skills.push(sk);
+        existing.add(can);
+      }
+    }
+  }
+  // merge certifications (strings)
+  if (Array.isArray(draft.certifications) && draft.certifications.length) {
+    const set = new Set((user.certifications || []).map((c) => (c || '').trim().toLowerCase()));
+    for (const c of draft.certifications) {
+      const key = (c || '').trim().toLowerCase();
+      if (key && !set.has(key)) {
+        user.certifications.push(c);
+        set.add(key);
+      }
+    }
+  }
+  // merge projects (dedup by title lowercase)
+  if (Array.isArray(draft.projects) && draft.projects.length) {
+    const set = new Set((user.projects || []).map((p) => (p?.title || '').trim().toLowerCase()));
+    for (const p of draft.projects) {
+      const key = (p?.title || '').trim().toLowerCase();
+      if (key && !set.has(key)) {
+        user.projects.push(p);
+        set.add(key);
+      }
+    }
+  }
+  // merge education (dedup by degreeName+collegeName lowercase)
+  if (Array.isArray(draft.education) && draft.education.length) {
+    const set = new Set((user.education || []).map((e) => `${(e?.degreeName||'').toLowerCase()}|${(e?.collegeName||'').toLowerCase()}`));
+    for (const e of draft.education) {
+      const key = `${(e?.degreeName||'').toLowerCase()}|${(e?.collegeName||'').toLowerCase()}`;
+      if (key.trim() && !set.has(key)) {
+        user.education.push(e);
+        set.add(key);
+      }
+    }
+  }
+
+  // Update steps completed and save
+  user.stepsCompleted = computeStepsCompleted(user);
+  await user.save();
+
+  res.json({ 
+    success: true, 
+    message: "Resume processed and data merged into profile",
+    ocrDraft: user.ocrDraft,
+    user: user
+  });
 });
 
 
