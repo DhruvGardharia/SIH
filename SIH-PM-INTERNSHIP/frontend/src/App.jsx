@@ -10,6 +10,7 @@ import Forgot from "./pages/Forgot";
 import Reset from "./pages/Reset";
 import OtpVerify from "./pages/OtpVerify";
 import InternshipDashboard from "./pages/InternshipDashboard";
+import InternshipChatbot from "./pages/InternshipChatbot";
 
 const App = () => {
   const { loading, isAuth, user } = UserData();
@@ -53,6 +54,7 @@ const App = () => {
             {/* Reset Password */}
             <Route path="/reset-password/:token" element={<Reset />} />
             <Route path="/in" element={<InternshipDashboard />} />
+            <Route path="/internship-chatbot" element={<InternshipChatbot />} />
 
             {/* You can add protected dashboard later */}
             {/* <Route path="/dashboard" element={isAuth ? <Dashboard /> : <Login />} /> */}

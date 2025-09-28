@@ -10,6 +10,7 @@ import cors from 'cors';
 import multer from 'multer';
 import fs from 'fs';
 import FormData from 'form-data';
+import chatbotRoutes from './routes/chatbot.js';
 dotenv.config();
 const port=process.env.PORT || 5000;
 
@@ -29,7 +30,9 @@ app.use(cookieParser());
 
 import userRoutes from './routes/userRoutes.js';
 
-app.use('/api/user', userRoutes);       
+app.use('/api/user', userRoutes);
+app.use('/api/chatbot', chatbotRoutes);
+
 
 app.listen(port , ()=>{
     console.log(`Server is running on http://localhost:${port}`);
