@@ -9,6 +9,7 @@ import { Loading } from "./components/Loading";
 import Forgot from "./pages/Forgot";
 import Reset from "./pages/Reset";
 import OtpVerify from "./pages/OtpVerify";
+import InternshipDashboard from "./pages/InternshipDashboard";
 
 const App = () => {
   const { loading, isAuth, user } = UserData();
@@ -51,6 +52,7 @@ const App = () => {
 
             {/* Reset Password */}
             <Route path="/reset-password/:token" element={<Reset />} />
+            <Route path="/in" element={<InternshipDashboard />} />
 
             {/* You can add protected dashboard later */}
             {/* <Route path="/dashboard" element={isAuth ? <Dashboard /> : <Login />} /> */}
