@@ -22,7 +22,7 @@ if not API_KEY:
     raise ValueError("❌ GOOGLE_API_KEY not found in .env file")
 
 genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 # -----------------------
 # FastAPI Setup

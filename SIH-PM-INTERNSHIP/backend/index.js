@@ -28,8 +28,10 @@ app.use(cookieParser());
 
 
 import userRoutes from './routes/userRoutes.js';
+import chatbotRoutes from './routes/chatbot.js';
 
-app.use('/api/user', userRoutes);       
+app.use('/api/user', userRoutes);  
+app.use('/api/chatbot', chatbotRoutes);     
 
 app.listen(port , ()=>{
     console.log(`Server is running on http://localhost:${port}`);

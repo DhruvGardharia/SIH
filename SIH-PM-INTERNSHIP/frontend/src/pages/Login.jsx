@@ -4,7 +4,6 @@ import { useNavigate, Link } from 'react-router-dom'
 import { LoadingAnimation } from '../components/Loading'
 import { motion } from 'framer-motion'
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa'
-import { FaGoogle } from "react-icons/fa";
 
 const Login = () => {
     const [email, setEmail] = useState("")
@@ -64,145 +63,297 @@ const Login = () => {
     }
     
     return (
-        <div className='min-h-screen flex items-center justify-center p-4'>
-            <motion.div 
-                className='w-80 glass-card rounded-xl shadow-2xl border border-border overflow-hidden'
-                initial="hidden"
-                animate="visible"
-                variants={containerVariants}
-            >
-                {/* Header Section */}
-                <div className='px-5 pt-6 pb-4 text-center'>
-                    <motion.h1 
-                        className='text-xl font-bold text-primary mb-1' 
-                        variants={itemVariants}
-                    >
-                        PROIMG
-                    </motion.h1>
-                    <motion.p 
-                        className='text-base text-foreground font-medium' 
-                        variants={itemVariants}
-                    >
-                        Welcome Back
-                    </motion.p>
-                    <motion.p 
-                        className='text-xs text-muted-foreground mt-1' 
-                        variants={itemVariants}
-                    >
-                        Sign in to your account
-                    </motion.p>
-                </div>
+        <div 
+            className='min-h-screen flex flex-col'
+            style={{
+                background: "linear-gradient(to right, rgba(255,153,51,0.15) 0%, rgba(255,255,255,0.95) 33%, rgba(255,255,255,0.95) 67%, rgba(19,136,8,0.15) 100%)",
+            }}
+        >
+            {/* Decorative Pattern Overlay */}
+            <div 
+                className="fixed inset-0 pointer-events-none opacity-5"
+                style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FF6B35' fill-opacity='0.3'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+                }}
+            />
 
-                {/* Form Section */}
-                <div className='px-5 pb-6'>
-                    {formError && (
-                        <motion.div 
-                            className='mb-3 p-2 bg-destructive/15 border border-destructive rounded-lg text-destructive-foreground text-xs text-center'
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            transition={{ duration: 0.3 }}
-                        >
-                            {formError}
-                        </motion.div>
-                    )}
-                    
-                    <form onSubmit={submitHandler} className='space-y-3'>
-                        <motion.div variants={itemVariants}>
-                            <label htmlFor="email" className='block text-xs font-semibold text-foreground mb-1 uppercase tracking-wide'>
-                                Email Address
-                            </label>
-                            <div className='relative'>
-                                <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                                    <FaEnvelope className='text-muted-foreground text-xs' />
-                                </div>
-                                <input 
-                                    value={email} 
-                                    onChange={(e) => setEmail(e.target.value)} 
-                                    required 
-                                    type="email" 
-                                    id='email' 
-                                    className='w-full py-2.5 pl-9 pr-3 border border-input bg-background/80 rounded-lg text-foreground text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200' 
-                                    placeholder='Enter your email'
-                                />
-                            </div>
-                        </motion.div>
-                        
-                        <motion.div variants={itemVariants}>
-                            <label htmlFor="password" className='block text-xs font-semibold text-foreground mb-1 uppercase tracking-wide'>
-                                Password
-                            </label>
-                            <div className='relative'>
-                                <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                                    <FaLock className='text-muted-foreground text-xs' />
-                                </div>
-                                <input 
-                                    value={password} 
-                                    onChange={(e) => setPassword(e.target.value)} 
-                                    required 
-                                    type={showPassword ? "text" : "password"} 
-                                    id='password' 
-                                    className='w-full py-2.5 pl-9 pr-9 border border-input bg-background/80 rounded-lg text-foreground text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200' 
-                                    placeholder='Enter your password'
-                                />
+            {/* Main Content */}
+            <div className='flex-grow flex items-center justify-center p-6 relative z-10'>
+                <motion.div 
+                    className='w-full max-w-md'
+                    initial="hidden"
+                    animate="visible"
+                    variants={containerVariants}
+                >
+                    {/* Login Card */}
+                    <div className='rounded-2xl shadow-lg overflow-hidden bg-white/95 backdrop-blur-md border border-orange-100/50'>
+                        {/* Header Section */}
+                        <div className='px-8 pt-10 pb-6 text-center'>
+                            <motion.div 
+                                className="flex items-center justify-center mb-4"
+                                variants={itemVariants}
+                            >
                                 <div 
-                                    className='absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer'
-                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg"
+                                    style={{ 
+                                        background: "linear-gradient(135deg, #FF9933 0%, #FF6B35 100%)",
+                                    }}
                                 >
-                                    {showPassword ? 
-                                        <FaEyeSlash className='text-muted-foreground hover:text-foreground transition-colors duration-200 text-xs' /> : 
-                                        <FaEye className='text-muted-foreground hover:text-foreground transition-colors duration-200 text-xs' />
-                                    }
+                                    <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                    </svg>
                                 </div>
+                            </motion.div>
+
+                            <motion.h1 
+                                className='text-4xl font-bold mb-2' 
+                                variants={itemVariants}
+                                style={{ 
+                                    fontFamily: "Playfair Display, serif", 
+                                    background: "linear-gradient(135deg, #1F2937 0%, #374151 100%)",
+                                    WebkitBackgroundClip: "text",
+                                    WebkitTextFillColor: "transparent",
+                                    backgroundClip: "text"
+                                }}
+                            >
+                                Welcome Back
+                            </motion.h1>
+
+                            <motion.div 
+                                className="flex items-center justify-center mb-4"
+                                variants={itemVariants}
+                            >
+                                <div className="flex space-x-1">
+                                    <div className="w-3 h-1 rounded-full bg-orange-400"></div>
+                                    <div className="w-8 h-1 rounded-full bg-blue-500"></div>
+                                    <div className="w-3 h-1 rounded-full bg-green-500"></div>
+                                </div>
+                            </motion.div>
+                            
+                            <motion.p 
+                                className='text-base leading-relaxed' 
+                                variants={itemVariants}
+                                style={{ 
+                                    fontFamily: "Inter, sans-serif", 
+                                    color: "#4B5563"
+                                }}
+                            >
+                                Sign in to your account to continue
+                            </motion.p>
+                        </div>
+
+                        {/* Form Section */}
+                        <div className='px-8 pb-10'>
+                            {formError && (
+                                <motion.div 
+                                    className='mb-4 p-3 bg-red-50/80 border border-red-200/50 rounded-xl backdrop-blur-md'
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    transition={{ duration: 0.3 }}
+                                >
+                                    <div className="flex items-center">
+                                        <svg className="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span 
+                                            className="text-sm"
+                                            style={{ fontFamily: "Inter, sans-serif", color: "#DC2626" }}
+                                        >
+                                            {formError}
+                                        </span>
+                                    </div>
+                                </motion.div>
+                            )}
+                            
+                            <form onSubmit={submitHandler} className='space-y-5'>
+                                <motion.div variants={itemVariants}>
+                                    <label 
+                                        htmlFor="email" 
+                                        className='block text-sm font-semibold mb-2'
+                                        style={{ fontFamily: "Inter, sans-serif", color: "#1F2937" }}
+                                    >
+                                        Email Address
+                                    </label>
+                                    <div className='relative'>
+                                        <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
+                                            <FaEnvelope className='text-gray-400' />
+                                        </div>
+                                        <input 
+                                            value={email} 
+                                            onChange={(e) => setEmail(e.target.value)} 
+                                            required 
+                                            type="email" 
+                                            id='email' 
+                                            className='w-full py-3 pl-11 pr-4 border border-orange-100 bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 shadow-sm' 
+                                            placeholder='Enter your email'
+                                            style={{ fontFamily: "Inter, sans-serif", color: "#1F2937" }}
+                                        />
+                                    </div>
+                                </motion.div>
+                                
+                                <motion.div variants={itemVariants}>
+                                    <label 
+                                        htmlFor="password" 
+                                        className='block text-sm font-semibold mb-2'
+                                        style={{ fontFamily: "Inter, sans-serif", color: "#1F2937" }}
+                                    >
+                                        Password
+                                    </label>
+                                    <div className='relative'>
+                                        <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
+                                            <FaLock className='text-gray-400' />
+                                        </div>
+                                        <input 
+                                            value={password} 
+                                            onChange={(e) => setPassword(e.target.value)} 
+                                            required 
+                                            type={showPassword ? "text" : "password"} 
+                                            id='password' 
+                                            className='w-full py-3 pl-11 pr-11 border border-orange-100 bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 shadow-sm' 
+                                            placeholder='Enter your password'
+                                            style={{ fontFamily: "Inter, sans-serif", color: "#1F2937" }}
+                                        />
+                                        <div 
+                                            className='absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer'
+                                            onClick={() => setShowPassword(!showPassword)}
+                                        >
+                                            {showPassword ? 
+                                                <FaEyeSlash className='text-gray-400 hover:text-gray-600 transition-colors duration-200' /> : 
+                                                <FaEye className='text-gray-400 hover:text-gray-600 transition-colors duration-200' />
+                                            }
+                                        </div>
+                                    </div>
+                                </motion.div>
+                                
+                                <motion.div className='flex items-center justify-between py-1' variants={itemVariants}>
+                                    <div className='flex items-center'>
+                                        <input 
+                                            type="checkbox" 
+                                            id="remember" 
+                                            className='h-4 w-4 rounded border-orange-200 text-orange-500 focus:ring-orange-400'
+                                            checked={rememberMe}
+                                            onChange={() => setRememberMe(!rememberMe)}
+                                        />
+                                        <label 
+                                            htmlFor="remember" 
+                                            className='ml-2 block text-sm'
+                                            style={{ fontFamily: "Inter, sans-serif", color: "#6B7280" }}
+                                        >
+                                            Remember me
+                                        </label>
+                                    </div>
+                                    <Link 
+                                        to="/forgot" 
+                                        className='text-sm font-medium transition-colors duration-200'
+                                        style={{ 
+                                            fontFamily: "Inter, sans-serif",
+                                            color: "#FF9933"
+                                        }}
+                                        onMouseEnter={(e) => e.target.style.color = "#FF6B35"}
+                                        onMouseLeave={(e) => e.target.style.color = "#FF9933"}
+                                    >
+                                        Forgot password?
+                                    </Link>
+                                </motion.div>
+                                
+                                <motion.button 
+                                    type='submit' 
+                                    className='group w-full py-3.5 px-4 rounded-xl font-semibold text-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center mt-6'
+                                    disabled={btnLoading}
+                                    variants={itemVariants}
+                                    style={{
+                                        background: "linear-gradient(135deg, #138808 0%, #059669 100%)",
+                                        fontFamily: "Inter, sans-serif",
+                                    }}
+                                >
+                                    {btnLoading ? (
+                                        <LoadingAnimation />
+                                    ) : (
+                                        <span className="flex items-center justify-center space-x-2">
+                                            <span>SIGN IN</span>
+                                            <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                            </svg>
+                                        </span>
+                                    )}
+                                </motion.button>
+                            </form>
+                            
+                            <motion.div className='mt-6' variants={itemVariants}>
+                                <div className='relative mb-6'>
+                                    <div className='absolute inset-0 flex items-center'>
+                                        <div className='w-full border-t border-orange-100'></div>
+                                    </div>
+                                    <div className="relative flex justify-center text-sm">
+                                        <span 
+                                            className='px-3 bg-white'
+                                            style={{ fontFamily: "Inter, sans-serif", color: "#9CA3AF" }}
+                                        >
+                                            or
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div 
+                                    className='text-center text-sm'
+                                    style={{ fontFamily: "Inter, sans-serif", color: "#6B7280" }}
+                                >
+                                    Don't have an account?{' '}
+                                    <Link 
+                                        to="/register" 
+                                        className='font-semibold transition-colors duration-200'
+                                        style={{ color: "#FF9933" }}
+                                        onMouseEnter={(e) => e.target.style.color = "#FF6B35"}
+                                        onMouseLeave={(e) => e.target.style.color = "#FF9933"}
+                                    >
+                                        Create an account
+                                    </Link>
+                                </div>
+                            </motion.div>
+                        </div>
+                    </div>
+                </motion.div>
+            </div>
+
+            {/* Footer */}
+            <footer className="py-8 bg-white/95 backdrop-blur-md border-t border-orange-100/50 relative z-10">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="flex flex-col items-center space-y-4">
+                        {/* Decorative Element */}
+                        <div className="flex items-center space-x-3">
+                            <div className="w-8 h-0.5 bg-gradient-to-r from-orange-400 to-orange-300 rounded-full"></div>
+                            <div className="flex items-center space-x-2">
+                                <div className="w-3 h-3 rounded-full bg-orange-400 shadow-sm"></div>
+                                <div className="w-3 h-3 rounded-full bg-blue-500 shadow-sm"></div>
+                                <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm"></div>
                             </div>
-                        </motion.div>
-                        
-                        <motion.div className='flex items-center justify-between py-1' variants={itemVariants}>
-                            <div className='flex items-center'>
-                                <input 
-                                    type="checkbox" 
-                                    id="remember" 
-                                    className='h-3 w-3 text-primary focus:ring-primary border-input rounded bg-background'
-                                    checked={rememberMe}
-                                    onChange={() => setRememberMe(!rememberMe)}
-                                />
-                                <label htmlFor="remember" className='ml-2 block text-xs text-muted-foreground'>
-                                    Remember me
-                                </label>
-                            </div>
-                            <Link to="/forgot" className='text-xs font-medium text-primary hover:text-primary/90 transition-colors duration-200'>
-                                Forgot password?
-                            </Link>
-                        </motion.div>
-                        
-                        <motion.button 
-                            type='submit' 
-                            className='w-full py-2.5 px-4 border border-transparent rounded-lg shadow-lg text-xs font-semibold text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 flex items-center justify-center transform hover:scale-[1.02] active:scale-[0.98] mt-4'
-                            disabled={btnLoading}
-                            variants={itemVariants}
-                        >
-                            {btnLoading ? <LoadingAnimation /> : "SIGN IN"}
-                        </motion.button>
-                    </form>
-                    
-                    <motion.div className='mt-4' variants={itemVariants}>
-                        <div className='relative mb-4'>
-                            <div className='absolute inset-0 flex items-center'>
-                                <div className='w-full border-t border-border'></div>
-                            </div>
-                            <div className="relative flex justify-center text-xs">
-                                <span className='px-2 bg-transparent text-muted-foreground'>or</span>
-                            </div>
+                            <div className="w-8 h-0.5 bg-gradient-to-l from-green-400 to-green-300 rounded-full"></div>
                         </div>
                         
-                        <div className='text-center text-xs text-muted-foreground'>
-                            Don't have an account?{' '}
-                            <Link to="/register" className='font-semibold text-primary hover:text-primary/90 transition-colors duration-200'>
-                                Create an account
-                            </Link>
+                        {/* Footer Text */}
+                        <div className="text-center">
+                            <p
+                                className="text-lg font-semibold"
+                                style={{ 
+                                    fontFamily: "Playfair Display, serif", 
+                                    background: "linear-gradient(135deg, #FF9933 0%, #138808 100%)",
+                                    WebkitBackgroundClip: "text",
+                                    WebkitTextFillColor: "transparent",
+                                    backgroundClip: "text"
+                                }}
+                            >
+                                भारत सरकार | Government of India
+                            </p>
+                            <p
+                                className="text-sm text-gray-500 mt-1"
+                                style={{ fontFamily: "Inter, sans-serif" }}
+                            >
+                                Skill Development & Entrepreneurship Initiative
+                            </p>
                         </div>
-                    </motion.div>
+                    </div>
                 </div>
-            </motion.div>
+            </footer>
         </div>
     )
 }
